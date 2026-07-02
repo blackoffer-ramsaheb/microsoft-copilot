@@ -5,7 +5,17 @@
 
 "use strict";
 
-const API_BASE = window.COPILOT_API_BASE || "http://localhost:5000";
+// When served by Flask at http://localhost:5000, use same-origin (empty string).
+// When opened as a file:// or from another host, fall back to localhost:5000.
+const API_BASE = (() => {
+  if (window.COPILOT_API_BASE) return window.COPILOT_API_BASE;
+  // Same-origin: the page IS the backend
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    return window.location.origin === "null" ? "http://localhost:5000" : "";
+  }
+  // file:// — must hit the backend explicitly
+  return "http://localhost:5000";
+})();
 
 /* ============================================================
    STATE

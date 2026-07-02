@@ -8,12 +8,13 @@ Key improvements over original:
   4.  secure_filename empty-string guard
   5.  Broad exception catch in /upload (not just FileNotFoundError / ValueError)
   6.  User-input length capped in build_prompt (prevents LLM context overflow)
-  7.  /health endpoint (JSON) replaces the plain-text / health check
+  7.  /health endpoint (JSON) with Ollama reachability probe
   8.  Request logging via Python logging module
-  9.  CORS allowed origins configurable via CORS_ORIGINS env var
+  9.  CORS allows all origins including null (file://) for local dev
   10. Max text length enforced on /rewrite and /translate payloads
   11. Content-Type validation on JSON endpoints
   12. /status endpoint exposes current document info and Ollama reachability
+  13. Flask serves the frontend folder directly — open http://localhost:5000
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ import threading
 from pathlib import Path
 from uuid import uuid4
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
@@ -52,22 +53,31 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Flask app
 # ---------------------------------------------------------------------------
+BASE_DIR      = Path(__file__).resolve().parent
+FRONTEND_DIR  = BASE_DIR.parent / "frontend"
+
 app = Flask(__name__)
 
-# CORS — restrict origins in production via env var
-# e.g. export CORS_ORIGINS="https://myapp.com,https://www.myapp.com"
+# CORS — allow all origins including "null" (file:// local dev).
+# In production restrict via: export CORS_ORIGINS="https://yourdomain.com"
 _cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
 _cors_origins = (
     [o.strip() for o in _cors_origins_raw.split(",")]
     if _cors_origins_raw != "*"
     else "*"
 )
-CORS(app, origins=_cors_origins)
+CORS(
+    app,
+    origins=_cors_origins,
+    supports_credentials=False,
+    # Explicitly allow the "null" origin browsers send for file:// pages
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Content-Type"],
+)
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-BASE_DIR       = Path(__file__).resolve().parent
 UPLOAD_FOLDER  = BASE_DIR / "uploads"
 MAX_UPLOAD_MB  = int(os.getenv("MAX_UPLOAD_MB", "10"))
 MAX_UPLOAD_SIZE = MAX_UPLOAD_MB * 1024 * 1024
@@ -251,11 +261,29 @@ def handle_500(exc):
 
 @app.route("/", methods=["GET"])
 def home():
+    """Serve the frontend index.html (or return JSON for API clients)."""
+    # If a browser requests HTML, serve the frontend
+    accept = request.headers.get("Accept", "")
+    if "text/html" in accept and FRONTEND_DIR.exists():
+        return send_from_directory(str(FRONTEND_DIR), "index.html")
+    # API / health-check clients get JSON
     return jsonify({
         "service": "Copilot AI Workspace Assistant",
         "status":  "running",
         "version": "2.0",
+        "frontend": f"Open http://localhost:{os.getenv('PORT', '5000')} in your browser",
     })
+
+
+@app.route("/<path:filename>", methods=["GET"])
+def serve_frontend_static(filename):
+    """Serve any frontend static file (style.css, script.js, etc.)."""
+    # Only serve files that actually exist in the frontend folder
+    target = FRONTEND_DIR / filename
+    if target.exists() and target.is_file():
+        return send_from_directory(str(FRONTEND_DIR), filename)
+    # Fall through to 404 handler
+    return handle_404(None)
 
 
 @app.route("/health", methods=["GET"])
