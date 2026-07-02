@@ -29,7 +29,7 @@ Inspired by the Microsoft Copilot UX — clean, modern, and fully functional.
 |---|---|
 | Frontend | HTML5 · Vanilla CSS · Vanilla JavaScript |
 | Backend | Python 3.10+ · Flask 3.x · Flask-CORS |
-| AI | [Ollama](https://ollama.com) (local LLM — default: `qwen2.5:7b`) |
+| AI | [Ollama](https://ollama.com) (local LLM — default: `llama3.1:8b`) |
 | Document parsing | pypdf · python-docx |
 
 ---
@@ -40,7 +40,7 @@ Inspired by the Microsoft Copilot UX — clean, modern, and fully functional.
 
 ```bash
 # Install Ollama from https://ollama.com
-ollama pull qwen2.5:7b
+ollama pull llama3.1:8b
 ```
 
 ### 2. Set up the Python backend
@@ -65,7 +65,7 @@ All are optional; defaults work out of the box.
 | Variable | Default | Description |
 |---|---|---|
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama base URL |
-| `OLLAMA_MODEL` | `qwen2.5:7b` | Model to use |
+| `OLLAMA_MODEL` | `llama3.1:8b` | Model to use |
 | `OLLAMA_TIMEOUT` | `120` | Request timeout in seconds |
 | `OLLAMA_MAX_RETRIES` | `2` | Retries on transient errors |
 | `MAX_UPLOAD_MB` | `10` | Max upload size in MB |

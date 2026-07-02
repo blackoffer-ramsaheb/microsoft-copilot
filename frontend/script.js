@@ -361,7 +361,7 @@ function buildShell() {
               <span id="statusText">Connecting…</span>
             </span>
             <span class="status-chip model-chip">
-              <span>Qwen2.5:7B</span>
+              <span>Llama3.1:8B</span>
             </span>
           </div>
 

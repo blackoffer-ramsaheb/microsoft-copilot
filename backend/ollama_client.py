@@ -32,7 +32,7 @@ OLLAMA_BASE_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_GENERATE_URL: str = f"{OLLAMA_BASE_URL}/api/generate"
 OLLAMA_TAGS_URL: str = f"{OLLAMA_BASE_URL}/api/tags"
 
-DEFAULT_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+DEFAULT_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 REQUEST_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "120"))
 MAX_RETRIES: int = int(os.getenv("OLLAMA_MAX_RETRIES", "2"))
 PING_TIMEOUT: int = int(os.getenv("OLLAMA_PING_TIMEOUT", "5"))
