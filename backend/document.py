@@ -58,7 +58,28 @@ def extract_text(file_path: str) -> str:
     else:
         raise ValueError(f"Unsupported file type: {ext}")
 
-    return raw[:MAX_CHARS]
+    return _sanitize_text(raw)[:MAX_CHARS]
+
+
+def _sanitize_text(text: str) -> str:
+    """Clean up common mojibake sequences in extracted text."""
+    if not text:
+        return text
+    replacements = {
+        "\u00e2\u0080\u0093": "–",
+        "\u00e2\u0080\u0094": "—",
+        "\u00e2\u0080\u009c": "“",
+        "\u00e2\u0080\u009d": "”",
+        "\u00e2\u0080\u0098": "‘",
+        "\u00e2\u0080\u0099": "’",
+        "\u00e2\u0080\u00a2": "•",
+        "\u00e2\u0080\u00a6": "…",
+        "\u00c2\u00a0": " ",
+    }
+    for bad, good in replacements.items():
+        if bad in text:
+            text = text.replace(bad, good)
+    return text
 
 
 # ---------------------------------------------------------------------------

@@ -116,8 +116,8 @@ function buildShell() {
           <div class="brand">
             <div class="brand-logo" aria-hidden="true">${icons.logoMark}</div>
             <div class="brand-text">
-              <div class="brand-name">AI Workspace</div>
-              <div class="brand-tagline">Microsoft Copilot Style</div>
+              <div class="brand-name">Copilot</div>
+              <div class="brand-tagline">AI Workspace</div>
             </div>
           </div>
           <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
@@ -126,64 +126,51 @@ function buildShell() {
         </div>
 
         <div class="sidebar-body">
-          <div class="sidebar-section" style="padding-bottom: 6px;">
+          <!-- Primary New Chat Action -->
+          <div class="sidebar-action-bar">
             <button class="new-chat-btn" id="newChatBtn" type="button" aria-label="Start new chat">
               ${icons.plus}
               <span class="new-chat-label">New Chat</span>
             </button>
           </div>
 
-          <div class="sidebar-section" style="padding-top: 4px; padding-bottom: 6px;">
+          <!-- Clean Tab Switcher: Chats & Documents -->
+          <div class="sidebar-tabs">
+            <button class="sidebar-tab-btn active" id="tabChatsBtn" type="button">
+              ${icons.chat}
+              <span>Chats</span>
+            </button>
+            <button class="sidebar-tab-btn" id="tabDocsBtn" type="button">
+              ${icons.doc}
+              <span>Library</span>
+            </button>
+          </div>
+
+          <!-- PANEL 1: Chats Panel -->
+          <div class="sidebar-tab-panel active" id="chatsTabPanel">
             <div class="search-wrap">
               <span class="search-icon" aria-hidden="true">${icons.search}</span>
               <input id="searchInput" class="search-input" type="search" placeholder="Search chats…" autocomplete="off" />
             </div>
-          </div>
-
-          <div class="sidebar-section-divider"></div>
-
-          <div class="sidebar-section">
-            <div class="section-label-row">
-              <span class="section-label">Chat History</span>
-              <button class="section-action-btn" id="clearAllChatsBtn" title="Clear all chat history" type="button">Clear</button>
+            <div class="conversation-list-wrap">
+              <div class="conversation-list" id="conversationList" role="list"></div>
             </div>
-            <div class="conversation-list" id="conversationList" role="list"></div>
+            <div class="sidebar-panel-footer">
+              <button class="section-action-btn" id="clearAllChatsBtn" title="Clear all chat history" type="button">
+                Clear history
+              </button>
+            </div>
           </div>
 
-          <div class="sidebar-section-divider"></div>
-
-          <div class="sidebar-section">
-            <div class="section-label-row">
-              <span class="section-label">Document Library (RAG)</span>
-              <button class="section-action-btn" id="sidebarUploadBtn" title="Upload document" type="button">+ Upload</button>
+          <!-- PANEL 2: Documents Panel -->
+          <div class="sidebar-tab-panel" id="docsTabPanel">
+            <div class="docs-header-row">
+              <span class="docs-header-title">Indexed Documents</span>
+              <button class="section-action-btn" id="sidebarUploadBtn" title="Upload document" type="button">
+                + Upload
+              </button>
             </div>
             <div class="document-list" id="documentList"></div>
-          </div>
-
-          <div class="sidebar-section-divider"></div>
-
-          <div class="sidebar-section">
-            <div class="section-label">Quick Actions</div>
-            <div class="quick-actions" id="quickActions">
-              <button class="quick-action-btn" data-action="summarize" type="button">
-                ${icons.summarize}<span class="qa-label">Summarize Document</span>
-              </button>
-              <button class="quick-action-btn" data-action="email" type="button">
-                ${icons.email}<span class="qa-label">Generate Email</span>
-              </button>
-              <button class="quick-action-btn" data-action="tasks" type="button">
-                ${icons.tasks}<span class="qa-label">Extract Action Items</span>
-              </button>
-              <button class="quick-action-btn" data-action="rewrite" type="button">
-                ${icons.rewrite}<span class="qa-label">Rewrite Text</span>
-              </button>
-              <button class="quick-action-btn" data-action="translate" type="button">
-                ${icons.translate}<span class="qa-label">Translate</span>
-              </button>
-              <button class="quick-action-btn danger" data-action="clear" type="button">
-                ${icons.clear}<span class="qa-label">Reset Current Chat</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -209,8 +196,8 @@ function buildShell() {
         <header class="mobile-header" id="mobileHeader">
           <button class="icon-btn" id="mobileMenuBtn" type="button" aria-label="Open menu">${icons.menu}</button>
           <div>
-            <div class="mobile-title">AI Workspace</div>
-            <div class="mobile-subtitle" id="mobileSubtitle">Copilot</div>
+            <div class="mobile-title">Copilot Workspace</div>
+            <div class="mobile-subtitle" id="mobileSubtitle">RAG Assistant</div>
           </div>
           <button class="icon-btn" id="mobileUploadBtn" type="button" aria-label="Upload">${icons.upload}</button>
         </header>
@@ -218,11 +205,19 @@ function buildShell() {
         <!-- Desktop Header -->
         <header class="main-header" id="mainHeader">
           <div class="header-left">
-            <div class="header-title">AI Workspace Assistant</div>
-            <div class="header-subtitle">Microsoft Copilot Experience · RAG Multi-Document Intelligence</div>
+            <div class="header-brand-title">
+              <span class="header-brand-name">Copilot</span>
+            </div>
+
+            <!-- Model Switcher Dropdown (Pill) -->
+            <div class="model-picker-wrap">
+              <select id="modelSelect" class="model-select" aria-label="Select AI Model">
+                <option value="llama3.1:8b">llama3.1:8b</option>
+              </select>
+            </div>
           </div>
 
-          <div class="header-center">
+          <div class="header-right">
             <!-- Connection Status Chip -->
             <button class="status-chip" id="connectionStatus" type="button" title="Click to refresh connection">
               <span class="status-dot" id="statusDot"></span>
@@ -230,18 +225,17 @@ function buildShell() {
               <span class="refresh-icon-inline">${icons.refresh}</span>
             </button>
 
-            <!-- Model Switcher Dropdown -->
-            <div class="model-picker-wrap">
-              <select id="modelSelect" class="model-select" aria-label="Select AI Model">
-                <option value="llama3.1:8b">llama3.1:8b (Default)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="header-right">
-            <button class="export-header-btn" id="headerExportBtn" type="button" title="Export conversation as Markdown">
-              ${icons.download} <span>Export</span>
+            <!-- Export Button -->
+            <button class="icon-btn-header" id="headerExportBtn" type="button" title="Export conversation as Markdown" aria-label="Export">
+              ${icons.download}
             </button>
+
+            <!-- Theme Toggle in Header -->
+            <button class="icon-btn-header" id="themeToggleBtnHeader" type="button" title="Toggle theme" aria-label="Toggle theme">
+              ${icons.moon}
+            </button>
+
+            <!-- Upload Document Button -->
             <button class="upload-btn" id="uploadBtn" type="button">
               ${icons.upload} <span>Upload Document</span>
             </button>
@@ -252,60 +246,59 @@ function buildShell() {
         <main class="conv-panel" id="convPanel">
           <!-- Welcome Screen -->
           <section class="welcome-screen" id="welcomeScreen">
-            <div class="welcome-icon-wrap" aria-hidden="true">${icons.sparkle}</div>
-            <h1 class="welcome-heading">What would you like to accomplish today?</h1>
-            <p class="welcome-sub">
-              Upload documents or chat freely. Your assistant extracts insights, synthesizes reports, drafts emails, and answers queries with precision.
-            </p>
+            <div class="welcome-center">
+              <div class="welcome-icon-wrap" aria-hidden="true">${icons.sparkle}</div>
+              <h1 class="welcome-heading">How can I help you today?</h1>
+              <p class="welcome-sub">
+                Upload documents or ask anything. I can synthesize reports, draft emails, and extract key insights.
+              </p>
 
-            <!-- Conversation Tone Selector -->
-            <div class="tone-selector-container">
-              <span class="tone-label">Choose a conversation style:</span>
-              <div class="tone-pills" id="tonePills">
-                <button class="tone-pill ${state.tone === 'creative' ? 'active' : ''}" data-tone="creative" type="button">
-                  <span class="tone-emoji">🎨</span> More Creative
+              <!-- Conversation Tone Selector (Segmented Pill) -->
+              <div class="tone-segmented-wrap">
+                <div class="tone-pills" id="tonePills">
+                  <button class="tone-pill ${state.tone === 'creative' ? 'active' : ''}" data-tone="creative" type="button">
+                    <span class="tone-emoji">🎨</span> Creative
+                  </button>
+                  <button class="tone-pill ${state.tone === 'balanced' ? 'active' : ''}" data-tone="balanced" type="button">
+                    <span class="tone-emoji">⚖️</span> Balanced
+                  </button>
+                  <button class="tone-pill ${state.tone === 'precise' ? 'active' : ''}" data-tone="precise" type="button">
+                    <span class="tone-emoji">🎯</span> Precise
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4 Refined Suggestions in Clean 2x2 Grid -->
+              <div class="suggestion-grid" id="suggestionGrid">
+                <button class="suggestion-card" data-prompt="Summarize my uploaded document with key takeaways" type="button">
+                  <div class="sg-icon-box">${icons.summarize}</div>
+                  <div class="sg-content">
+                    <span class="sg-title">Summarize Document</span>
+                    <span class="sg-hint">Executive briefing with key takeaways</span>
+                  </div>
                 </button>
-                <button class="tone-pill ${state.tone === 'balanced' ? 'active' : ''}" data-tone="balanced" type="button">
-                  <span class="tone-emoji">⚖️</span> More Balanced
+                <button class="suggestion-card" data-prompt="Draft a professional executive email based on the document" type="button">
+                  <div class="sg-icon-box">${icons.email}</div>
+                  <div class="sg-content">
+                    <span class="sg-title">Draft Executive Email</span>
+                    <span class="sg-hint">Polished message for team stakeholders</span>
+                  </div>
                 </button>
-                <button class="tone-pill ${state.tone === 'precise' ? 'active' : ''}" data-tone="precise" type="button">
-                  <span class="tone-emoji">🎯</span> More Precise
+                <button class="suggestion-card" data-prompt="Extract actionable tasks, deadlines, and owners" type="button">
+                  <div class="sg-icon-box">${icons.tasks}</div>
+                  <div class="sg-content">
+                    <span class="sg-title">Extract Action Items</span>
+                    <span class="sg-hint">Task checklist with deliverables</span>
+                  </div>
+                </button>
+                <button class="suggestion-card" data-prompt="Perform a SWOT analysis on the strategy in this document" type="button">
+                  <div class="sg-icon-box">${icons.sparkle}</div>
+                  <div class="sg-content">
+                    <span class="sg-title">SWOT & Strategic Analysis</span>
+                    <span class="sg-hint">Strengths, weaknesses, and key risks</span>
+                  </div>
                 </button>
               </div>
-            </div>
-
-            <!-- Suggestions Grid -->
-            <div class="suggestion-grid" id="suggestionGrid">
-              <button class="suggestion-card" data-prompt="Summarize my uploaded document with key takeaways" type="button">
-                ${icons.summarize}
-                <span class="sg-title">Summarize Document</span>
-                <span class="sg-hint">Generate an executive briefing with key findings</span>
-              </button>
-              <button class="suggestion-card" data-prompt="Draft a professional executive email based on the document" type="button">
-                ${icons.email}
-                <span class="sg-title">Draft Executive Email</span>
-                <span class="sg-hint">Create a polished email for team stakeholders</span>
-              </button>
-              <button class="suggestion-card" data-prompt="Extract actionable tasks, deadlines, and owners" type="button">
-                ${icons.tasks}
-                <span class="sg-title">Extract Action Items</span>
-                <span class="sg-hint">Pull out deliverables into actionable checklist</span>
-              </button>
-              <button class="suggestion-card" data-prompt="Perform a SWOT analysis on the strategy in this document" type="button">
-                ${icons.sparkle}
-                <span class="sg-title">SWOT Analysis</span>
-                <span class="sg-hint">Analyze strengths, weaknesses, opportunities & risks</span>
-              </button>
-              <button class="suggestion-card" data-prompt="Rewrite this text in a polished C-level executive tone" type="button">
-                ${icons.rewrite}
-                <span class="sg-title">Executive Polish</span>
-                <span class="sg-hint">Elevate communication tone, clarity, and impact</span>
-              </button>
-              <button class="suggestion-card" data-prompt="Translate text to Hindi" type="button">
-                ${icons.translate}
-                <span class="sg-title">Neural Translation</span>
-                <span class="sg-hint">Convert text to Hindi, Spanish, French, and more</span>
-              </button>
             </div>
           </section>
 
@@ -313,66 +306,83 @@ function buildShell() {
           <div class="message-stream hidden" id="messageStream" aria-live="polite"></div>
         </main>
 
-        <!-- Composer Panel -->
+        <!-- Composer Panel (Floating Pill) -->
         <div class="composer-panel" id="composerPanel">
-          <!-- Active Document Context Badge -->
-          <div class="active-doc-badge hidden" id="activeDocBadge">
-            <span class="adb-icon">${icons.doc}</span>
-            <span class="adb-text" id="activeDocBadgeText">Active Document: none</span>
-            <button class="adb-clear" id="activeDocBadgeClear" title="Clear active context" type="button">×</button>
-          </div>
-
-          <!-- Upload Progress -->
-          <div class="upload-progress" id="uploadProgress">
-            <div class="up-icon">${icons.upload}</div>
-            <div class="up-info">
-              <div class="up-name" id="upName">Uploading…</div>
-              <div class="up-status" id="upStatus">Processing file</div>
-              <div class="up-bar-wrap"><div class="up-bar" id="upBar" style="width:0%"></div></div>
+          <div class="composer-inner">
+            <!-- Active Document Context Badge -->
+            <div class="active-doc-badge hidden" id="activeDocBadge">
+              <span class="adb-icon">${icons.doc}</span>
+              <span class="adb-text" id="activeDocBadgeText">Active Document: none</span>
+              <button class="adb-clear" id="activeDocBadgeClear" title="Clear active context" type="button">×</button>
             </div>
-          </div>
 
-          <div class="composer-box" id="composerBox">
-            <textarea
-              id="composerTextarea"
-              class="composer-textarea"
-              rows="1"
-              placeholder="Ask Copilot anything, summarize documents, or explore ideas…"
-              aria-label="Message input"
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
+            <!-- Upload Progress -->
+            <div class="upload-progress" id="uploadProgress">
+              <div class="up-icon">${icons.upload}</div>
+              <div class="up-info">
+                <div class="up-name" id="upName">Uploading…</div>
+                <div class="up-status" id="upStatus">Processing file</div>
+                <div class="up-bar-wrap"><div class="up-bar" id="upBar" style="width:0%"></div></div>
+              </div>
+            </div>
 
-            <div class="composer-toolbar">
-              <div class="composer-tools">
-                <button class="composer-tool-btn" id="attachBtn" type="button" title="Attach Document (PDF, DOCX, TXT, MD, CSV)">
-                  ${icons.attach}
-                </button>
-                <button class="composer-tool-btn" id="micBtn" type="button" title="Voice Input (Speech-to-Text)">
-                  ${icons.mic}
-                </button>
-                <div class="composer-tone-indicator" id="composerToneIndicator" title="Current style">
-                  <span class="cti-dot"></span>
-                  <span id="composerToneText">Balanced</span>
+            <div class="composer-box" id="composerBox">
+              <textarea
+                id="composerTextarea"
+                class="composer-textarea"
+                rows="1"
+                placeholder="Ask Copilot anything, summarize documents, or explore ideas…"
+                aria-label="Message input"
+                autocomplete="off"
+                spellcheck="true"
+              ></textarea>
+
+              <div class="composer-toolbar">
+                <div class="composer-tools">
+                  <button class="composer-tool-btn" id="attachBtn" type="button" title="Attach Document (PDF, DOCX, TXT, MD, CSV)">
+                    ${icons.attach}
+                  </button>
+                  <button class="composer-tool-btn" id="micBtn" type="button" title="Voice Input (Speech-to-Text)">
+                    ${icons.mic}
+                  </button>
+
+                  <!-- Quick AI Actions Menu Trigger -->
+                  <div class="quick-tools-wrap">
+                    <button class="composer-tool-btn" id="quickToolsTrigger" type="button" title="Quick AI Actions">
+                      ${icons.sparkle}
+                    </button>
+                    <div class="quick-tools-menu hidden" id="quickToolsMenu">
+                      <div class="qtm-title">Quick AI Actions</div>
+                      <button class="quick-tool-btn" data-action="summarize" type="button">${icons.summarize}<span>Summarize Document</span></button>
+                      <button class="quick-tool-btn" data-action="email" type="button">${icons.email}<span>Draft Email</span></button>
+                      <button class="quick-tool-btn" data-action="tasks" type="button">${icons.tasks}<span>Extract Action Items</span></button>
+                      <button class="quick-tool-btn" data-action="rewrite" type="button">${icons.rewrite}<span>Rewrite Text</span></button>
+                      <button class="quick-tool-btn" data-action="translate" type="button">${icons.translate}<span>Translate</span></button>
+                      <button class="quick-tool-btn danger" data-action="clear" type="button">${icons.clear}<span>Reset Current Chat</span></button>
+                    </div>
+                  </div>
+
+                  <div class="composer-tone-indicator" id="composerToneIndicator" title="Current style">
+                    <span class="cti-dot"></span>
+                    <span id="composerToneText">Balanced</span>
+                  </div>
+                </div>
+
+                <div class="composer-right">
+                  <span class="char-count" id="charCount">0</span>
+                  <button class="stop-btn hidden" id="stopBtn" type="button" title="Stop generation">
+                    ${icons.stop} <span>Stop</span>
+                  </button>
+                  <button class="send-btn" id="sendBtn" type="button" disabled title="Send message">
+                    ${icons.send}
+                  </button>
                 </div>
               </div>
-
-              <div class="composer-right">
-                <span class="char-count" id="charCount">0</span>
-                <button class="stop-btn hidden" id="stopBtn" type="button" title="Stop generation">
-                  ${icons.stop} <span>Stop</span>
-                </button>
-                <button class="send-btn" id="sendBtn" type="button" disabled title="Send message">
-                  ${icons.send} <span>Send</span>
-                </button>
-              </div>
             </div>
-          </div>
 
-          <div class="composer-hint">
-            <span><kbd>Enter</kbd> to send</span>
-            <span><kbd>Shift</kbd> + <kbd>Enter</kbd> for new line</span>
-            <span>Drag & drop files anytime</span>
+            <div class="composer-hint">
+              <span>Copilot uses active documents for accurate RAG responses. Press <kbd>Enter</kbd> to send.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -455,9 +465,11 @@ function cacheElements() {
     "docPreviewModal", "previewTitle", "previewMetaGrid", "previewTextBox", "previewCloseBtn", "previewDismissBtn", "previewSetActiveBtn",
     "translateModal", "translateLangInput", "translateCancelBtn", "translateConfirmBtn",
     "rewriteModal", "rewriteTextInput", "rewriteCancelBtn", "rewriteConfirmBtn",
+    "tabChatsBtn", "tabDocsBtn", "chatsTabPanel", "docsTabPanel",
+    "themeToggleBtnHeader", "quickToolsTrigger", "quickToolsMenu",
   ];
   ids.forEach(id => { el[id] = document.getElementById(id); });
-  el.quickActionBtns = document.querySelectorAll(".quick-action-btn");
+  el.quickActionBtns = document.querySelectorAll(".quick-action-btn, .quick-tool-btn");
 }
 
 /* ============================================================
@@ -613,6 +625,38 @@ function bindEvents() {
   // Drag and drop file handling
   setupDragAndDrop();
 
+  // Sidebar Tab Switching
+  if (el.tabChatsBtn && el.tabDocsBtn) {
+    el.tabChatsBtn.addEventListener("click", () => {
+      el.tabChatsBtn.classList.add("active");
+      el.tabDocsBtn.classList.remove("active");
+      el.chatsTabPanel?.classList.add("active");
+      el.docsTabPanel?.classList.remove("active");
+    });
+    el.tabDocsBtn.addEventListener("click", () => {
+      el.tabDocsBtn.classList.add("active");
+      el.tabChatsBtn.classList.remove("active");
+      el.docsTabPanel?.classList.add("active");
+      el.chatsTabPanel?.classList.remove("active");
+    });
+  }
+
+  // Quick Tools Menu
+  if (el.quickToolsTrigger && el.quickToolsMenu) {
+    el.quickToolsTrigger.addEventListener("click", e => {
+      e.stopPropagation();
+      el.quickToolsMenu.classList.toggle("hidden");
+    });
+    document.addEventListener("click", () => {
+      el.quickToolsMenu.classList.add("hidden");
+    });
+  }
+
+  // Header Theme Toggle
+  if (el.themeToggleBtnHeader) {
+    el.themeToggleBtnHeader.addEventListener("click", toggleTheme);
+  }
+
   // Resize & Escape
   window.addEventListener("resize", onResize);
   document.addEventListener("keydown", e => {
@@ -621,6 +665,7 @@ function bindEvents() {
       closeModal("rewriteModal")();
       closeModal("docPreviewModal")();
       closeMobileSidebar();
+      el.quickToolsMenu?.classList.add("hidden");
     }
   });
 }
@@ -634,9 +679,13 @@ function applyTheme(theme) {
   if (el.themeLabel) {
     el.themeLabel.textContent = theme === "dark" ? "Light Mode" : "Dark Mode";
   }
+  const icon = theme === "dark" ? icons.sun : icons.moon;
   if (el.themeToggleBtn) {
     el.themeToggleBtn.querySelector("svg")?.remove();
-    el.themeToggleBtn.insertAdjacentHTML("afterbegin", theme === "dark" ? icons.sun : icons.moon);
+    el.themeToggleBtn.insertAdjacentHTML("afterbegin", icon);
+  }
+  if (el.themeToggleBtnHeader) {
+    el.themeToggleBtnHeader.innerHTML = icon;
   }
 }
 
@@ -991,55 +1040,162 @@ function renderMessage(msg) {
 }
 
 /* ============================================================
-   ADVANCED MARKDOWN RENDERER WITH CODE COPY & TABLES
+   ENCODING & MOJIBAKE REPAIR
+   ============================================================ */
+function cleanMojibake(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/\u00e2\u0080\u0093|â€“|â/g, "–")
+    .replace(/\u00e2\u0080\u0094|â€”|â/g, "—")
+    .replace(/\u00e2\u0080\u009c|â€œ|â/g, "“")
+    .replace(/\u00e2\u0080\u009d|â€\u009d|â/g, "”")
+    .replace(/\u00e2\u0080\u0098|â€˜|â/g, "‘")
+    .replace(/\u00e2\u0080\u0099|â€™|â/g, "’")
+    .replace(/\u00e2\u0080\u00a2|â€¢|â¢/g, "•")
+    .replace(/\u00e2\u0080\u00a6|â€¦|â¦/g, "…")
+    .replace(/\u00c2\u00a0|Â /g, " ")
+    .replace(/Â/g, "");
+}
+
+/* ============================================================
+   ADVANCED MARKDOWN RENDERER WITH RICH TABLES & CODE COPY
    ============================================================ */
 function renderMarkdown(raw) {
-  const codeBlocks = [];
-  let html = escHtml(raw);
+  if (!raw) return "";
+  raw = cleanMojibake(raw);
 
-  // Fenced Code Blocks with language and copy button
-  html = html.replace(/```([\w-]*)\n([\s\S]*?)```/g, (_, lang, code) => {
+  const codeBlocks = [];
+  const tableBlocks = [];
+
+  // 1. Fenced Code Blocks (preserved first before HTML escaping)
+  let html = raw.replace(/```([\w-]*)\n([\s\S]*?)```/g, (_, lang, code) => {
     const idx = codeBlocks.length;
     const language = lang || "code";
     const blockHtml = `
       <div class="code-block-container">
         <div class="code-block-header">
-          <span class="code-block-lang">${language}</span>
+          <span class="code-block-lang">${escHtml(language)}</span>
           <button class="code-copy-btn" onclick="copyCodeBlock(this)" type="button">
             ${icons.copy} <span>Copy</span>
           </button>
         </div>
-        <pre><code class="lang-${language}">${code}</code></pre>
+        <pre><code class="lang-${escHtml(language)}">${escHtml(code)}</code></pre>
       </div>
     `;
     codeBlocks.push(blockHtml);
     return `\x00CODE_${idx}\x00`;
   });
 
+  // 2. Markdown Tables: match any table block with headers and separator
+  const tableRegex = /(?:^|\n)([ \t]*\|[^\n]+\|[ \t]*\n[ \t]*\|(?:[ \t]*:?-+:?[ \t]*\|)+[ \t]*(?:\n[ \t]*\|[^\n]+\|[ \t]*)*)/g;
+
+  html = html.replace(tableRegex, (match, tableText) => {
+    const idx = tableBlocks.length;
+    const lines = tableText.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return match;
+
+    const parseCells = row => {
+      let inner = row;
+      if (inner.startsWith("|")) inner = inner.slice(1);
+      if (inner.endsWith("|")) inner = inner.slice(0, -1);
+      return inner.split("|").map(c => c.trim());
+    };
+
+    const headerCells = parseCells(lines[0]);
+    const sepCells = parseCells(lines[1]);
+    const alignments = sepCells.map(s => {
+      const left = s.startsWith(":");
+      const right = s.endsWith(":");
+      if (left && right) return "center";
+      if (right) return "right";
+      return "left";
+    });
+
+    const thead = `<thead><tr>${headerCells.map((h, i) => {
+      const align = alignments[i] || "left";
+      const isFirst = i === 0 ? ' class="col-category"' : "";
+      return `<th style="text-align:${align}"${isFirst}>${formatCellContent(h)}</th>`;
+    }).join("")}</tr></thead>`;
+
+    const bodyRows = lines.slice(2).map(row => {
+      const cells = parseCells(row);
+      const tds = cells.map((cell, i) => {
+        const align = alignments[i] || "left";
+        const isFirst = i === 0 ? ' class="col-category"' : "";
+        return `<td style="text-align:${align}"${isFirst}>${formatCellContent(cell)}</td>`;
+      }).join("");
+      return `<tr>${tds}</tr>`;
+    }).join("");
+
+    const renderedTable = `
+      <div class="md-table-wrap">
+        <table class="md-table">
+          ${thead}
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+    `;
+    tableBlocks.push(renderedTable);
+    return `\n\n\x00TABLE_${idx}\x00\n\n`;
+  });
+
+  function formatCellContent(cellText) {
+    let formatted = escHtml(cellText);
+    // Decode intentional <br> or <br/> tags
+    formatted = formatted.replace(/&lt;br\s*\/?&gt;/gi, "<br>");
+    // Bold, Italics, Code
+    formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    formatted = formatted.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    formatted = formatted.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Format list items inside cells (e.g. `<br>- item` or `- item`)
+    const parts = formatted.split(/<br\s*\/?>/gi);
+    if (parts.length > 1) {
+      formatted = parts.map((part, pIdx) => {
+        const pt = part.trim();
+        if (/^[-*•]\s+/.test(pt)) {
+          return `<div class="table-bullet-item"><span class="table-bullet">•</span><span>${pt.replace(/^[-*•]\s+/, "")}</span></div>`;
+        }
+        return pIdx === 0 ? pt : `<div style="margin-top:6px;">${pt}</div>`;
+      }).join("");
+    } else if (/^[-*•]\s+/.test(formatted.trim())) {
+      formatted = `<div class="table-bullet-item"><span class="table-bullet">•</span><span>${formatted.trim().replace(/^[-*•]\s+/, "")}</span></div>`;
+    }
+    return formatted;
+  }
+
+  // 3. Escape general HTML outside code blocks and tables
+  html = escHtml(html);
+
+  // 4. Markdown syntax rules
+  // Headers
+  html = html.replace(/^### (.*$)/gim, '<h3 class="md-h3">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 class="md-h2">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 class="md-h1">$1</h1>');
+  // Horizontal rule
+  html = html.replace(/^---$/gim, '<hr class="md-hr" />');
   // Inline code
   html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
   // Bold & Italics
   html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
   // Links
   html = html.replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
   // Blockquotes
   html = html.replace(/^>\s*(.+)$/gm, "<blockquote>$1</blockquote>");
-
-  // Checkbox list items (- [ ] and - [x])
+  // Checkbox list items
   html = html.replace(/^- \[ \] (.+)$/gm, '<li class="task-item"><input type="checkbox" disabled /> <span>$1</span></li>');
   html = html.replace(/^- \[x\] (.+)$/gm, '<li class="task-item"><input type="checkbox" checked disabled /> <span>$1</span></li>');
+  // Decode <br> tags
+  html = html.replace(/&lt;br\s*\/?&gt;/gi, "<br>");
 
-  // Paragraphs & Lists
+  // 5. Paragraphs & List handling
   const paragraphs = html.split(/\n{2,}/);
   html = paragraphs.map(block => {
     const trimmed = block.trim();
     if (!trimmed) return "";
-    if (trimmed.startsWith("\x00CODE_")) return trimmed;
-    if (trimmed.startsWith("<blockquote>")) return trimmed;
+    if (trimmed.includes("\x00CODE_") || trimmed.includes("\x00TABLE_")) return trimmed;
+    if (trimmed.startsWith("<h") || trimmed.startsWith("<hr") || trimmed.startsWith("<blockquote>")) return trimmed;
 
     const lines = trimmed.split(/\n/);
     const isBulletList = lines.every(l => /^[-*•] /.test(l) || l.includes('class="task-item"'));
@@ -1050,29 +1206,20 @@ function renderMarkdown(raw) {
         if (l.includes('class="task-item"')) return l;
         return `<li>${l.replace(/^[-*•] /, "").replace(/\n/g, " ")}</li>`;
       }).join("");
-      return `<ul>${items}</ul>`;
+      return `<ul class="md-ul">${items}</ul>`;
     }
 
     if (isNumList) {
       const items = lines.map(l => `<li>${l.replace(/^\d+\. /, "").replace(/\n/g, " ")}</li>`).join("");
-      return `<ol>${items}</ol>`;
+      return `<ol class="md-ol">${items}</ol>`;
     }
 
-    // Markdown Table Detection
-    if (lines.length >= 2 && lines[0].includes("|") && lines[1].includes("---")) {
-      const headers = lines[0].split("|").filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join("");
-      const bodyRows = lines.slice(2).map(row => {
-        const cells = row.split("|").filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join("");
-        return `<tr>${cells}</tr>`;
-      }).join("");
-      return `<table class="md-table"><thead><tr>${headers}</tr></thead><tbody>${bodyRows}</tbody></table>`;
-    }
-
-    return `<p>${trimmed.replace(/\n/g, "<br>")}</p>`;
+    return `<p class="md-p">${trimmed.replace(/\n/g, "<br>")}</p>`;
   }).join("");
 
-  // Restore Code Blocks
+  // 6. Restore code blocks & tables
   html = html.replace(/\x00CODE_(\d+)\x00/g, (_, i) => codeBlocks[Number(i)] || "");
+  html = html.replace(/\x00TABLE_(\d+)\x00/g, (_, i) => tableBlocks[Number(i)] || "");
 
   return html;
 }
@@ -1341,6 +1488,7 @@ function onSuggestionClick(e) {
 function onQuickAction(e) {
   const btn = e.target.closest("[data-action]");
   if (!btn) return;
+  el.quickToolsMenu?.classList.add("hidden");
   const action = btn.dataset.action;
   if (action === "clear") { clearCurrentChat(); return; }
   if (action === "translate") { openTranslateModal(); return; }

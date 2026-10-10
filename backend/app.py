@@ -510,10 +510,10 @@ def handle_streaming_chat(question, context_str, history, tone, req_model, doc_n
                     tone=tone,
                     doc_name=doc_name,
                 ):
-                    event_payload = json.dumps({"token": token, "done": False, "mode": provider})
+                    event_payload = json.dumps({"token": token, "done": False, "mode": provider}, ensure_ascii=False)
                     yield f"data: {event_payload}\n\n"
 
-                yield f"data: {json.dumps({'done': True, 'model': req_model, 'provider': provider, 'documentName': doc_name})}\n\n"
+                yield f"data: {json.dumps({'done': True, 'model': req_model, 'provider': provider, 'documentName': doc_name}, ensure_ascii=False)}\n\n"
                 return
             except Exception as exc:
                 logger.warning("Streaming LLM failed, sending offline response: %s", exc)
@@ -525,17 +525,18 @@ def handle_streaming_chat(question, context_str, history, tone, req_model, doc_n
             filename=doc_name or "document",
         )
         for part in fallback.split(" "):
-            yield f"data: {json.dumps({'token': part + ' ', 'done': False, 'mode': 'offline'})}\n\n"
+            yield f"data: {json.dumps({'token': part + ' ', 'done': False, 'mode': 'offline'}, ensure_ascii=False)}\n\n"
 
-        yield f"data: {json.dumps({'done': True, 'model': 'offline-intelligence', 'provider': 'offline', 'documentName': doc_name})}\n\n"
+        yield f"data: {json.dumps({'done': True, 'model': 'offline-intelligence', 'provider': 'offline', 'documentName': doc_name}, ensure_ascii=False)}\n\n"
 
     return Response(
         stream_with_context(generate_events()),
-        mimetype="text/event-stream",
+        mimetype="text/event-stream; charset=utf-8",
         headers={
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
             "Connection": "keep-alive",
+            "Content-Type": "text/event-stream; charset=utf-8",
         },
     )
 

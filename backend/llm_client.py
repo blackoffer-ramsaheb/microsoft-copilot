@@ -244,6 +244,35 @@ def build_system_and_prompt(
 # Synchronous Non-Streaming Request
 # ---------------------------------------------------------------------------
 
+def sanitize_utf8(text: str) -> str:
+    """Repair common mojibake / double-encoded UTF-8 artifacts."""
+    if not text:
+        return text
+    replacements = {
+        "\u00e2\u0080\u0093": "–",
+        "\u00e2\u0080\u0094": "—",
+        "\u00e2\u0080\u009c": "“",
+        "\u00e2\u0080\u009d": "”",
+        "\u00e2\u0080\u0098": "‘",
+        "\u00e2\u0080\u0099": "’",
+        "\u00e2\u0080\u00a2": "•",
+        "\u00e2\u0080\u00a6": "…",
+        "\u00c2\u00a0": " ",
+        "â": "–",
+        "â": "—",
+        "â": "“",
+        "â": "”",
+        "â": "‘",
+        "â": "’",
+        "â¢": "•",
+        "â¦": "…",
+    }
+    for bad, good in replacements.items():
+        if bad in text:
+            text = text.replace(bad, good)
+    return text
+
+
 def ask_llm(
     task: str,
     user_input: Optional[str] = None,
@@ -277,18 +306,19 @@ def ask_llm(
             }
             resp = requests.post(GROQ_CHAT_URL, headers=headers, json=payload, timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
+            resp.encoding = "utf-8"
             data = resp.json()
             answer = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
             if answer:
                 elapsed = time.perf_counter() - t0
                 logger.info("Groq OK | model=%s | elapsed=%.2fs", resolved_model, elapsed)
-                return answer
+                return sanitize_utf8(answer)
         except Exception as exc:
             logger.warning("Groq request failed: %s; checking Ollama fallback...", exc)
 
     # 2. Try Ollama fallback
     prompt = build_system_and_prompt(task, user_input, document_context, history, tone, doc_name)
-    return ask_ollama_raw(prompt, model=OLLAMA_MODEL, temperature=temperature, num_predict=max_tokens)
+    return sanitize_utf8(ask_ollama_raw(prompt, model=OLLAMA_MODEL, temperature=temperature, num_predict=max_tokens))
 
 
 def ask_ollama_raw(prompt: str, model: str, temperature: float = 0.2, num_predict: int = 1536) -> str:
@@ -301,6 +331,7 @@ def ask_ollama_raw(prompt: str, model: str, temperature: float = 0.2, num_predic
     }
     resp = requests.post(OLLAMA_GENERATE_URL, json=payload, timeout=REQUEST_TIMEOUT)
     resp.raise_for_status()
+    resp.encoding = "utf-8"
     data = resp.json()
     answer = str(data.get("response", "")).strip()
     if not answer:
@@ -345,10 +376,10 @@ def stream_llm(
             resp = requests.post(GROQ_CHAT_URL, headers=headers, json=payload, timeout=REQUEST_TIMEOUT, stream=True)
             resp.raise_for_status()
 
-            for line in resp.iter_lines(decode_unicode=True):
-                if not line:
+            for raw_line in resp.iter_lines(decode_unicode=False):
+                if not raw_line:
                     continue
-                trimmed = line.strip()
+                trimmed = raw_line.decode("utf-8", errors="replace").strip()
                 if trimmed == "data: [DONE]":
                     break
                 if trimmed.startswith("data: "):
@@ -359,7 +390,7 @@ def stream_llm(
                             delta = choices[0].get("delta", {})
                             token = delta.get("content", "")
                             if token:
-                                yield token
+                                yield sanitize_utf8(token)
                     except Exception:
                         continue
             return
